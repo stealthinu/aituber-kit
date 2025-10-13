@@ -104,6 +104,7 @@ type EmotionFieldKey = (typeof emotionFields)[number]['key']
 
 const Live2DSettingsForm = () => {
   const store = settingsStore()
+  const selectedLive2DPath = store.selectedLive2DPath
   const { t } = useTranslation()
   const [currentModel, setCurrentModel] = useState<Live2DModel | null>(null)
   const [openDropdown, setOpenDropdown] = useState<EmotionFieldKey | null>(null)
@@ -123,23 +124,26 @@ const Live2DSettingsForm = () => {
       }
     }
 
-    if (store.selectedLive2DPath) {
+    if (selectedLive2DPath) {
       fetchCurrentModel()
     }
-  }, [store.selectedLive2DPath])
+  }, [selectedLive2DPath])
 
   // コンポーネントマウント時にデフォルト値を設定
   useEffect(() => {
+    const currentStore = settingsStore.getState()
     const updates: Record<string, any> = {}
 
     emotionFields.forEach((field) => {
-      if (!store[field.key] || store[field.key].length === 0) {
+      const value = currentStore[field.key as keyof SettingsState]
+      if (!value || (Array.isArray(value) && value.length === 0)) {
         updates[field.key] = field.defaultValue
       }
     })
 
     motionFields.forEach((field) => {
-      if (!store[field.key] || store[field.key] === '') {
+      const value = currentStore[field.key as keyof SettingsState]
+      if (!value || value === '') {
         updates[field.key] = field.defaultValue
       }
     })

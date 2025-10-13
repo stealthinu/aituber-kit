@@ -234,7 +234,14 @@ export const useBrowserSpeechRecognition = (
         }, 300)
       }
     }
-  }, [recognition, checkMicrophonePermission])
+  }, [
+    checkMicrophonePermission,
+    initialSpeechTimeout,
+    recognition,
+    startSilenceDetection,
+    stopListening,
+    t,
+  ])
 
   // ----- 音声認識トグル処理 -----
   const toggleListening = useCallback(() => {
@@ -512,7 +519,8 @@ export const useBrowserSpeechRecognition = (
     selectLanguage,
     initialSpeechTimeout,
     t,
-    // stopListening,
+    stopListening,
+    startListening,
     clearSilenceDetection,
     clearInitialSpeechCheckTimer,
     startSilenceDetection,

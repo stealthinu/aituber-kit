@@ -398,7 +398,12 @@ export const useRealtimeVoiceAPI = (
       }
       clearSilenceDetection()
     }
-  }, [])
+  }, [
+    clearSilenceDetection,
+    startSilenceDetection,
+    stopListening,
+    updateSpeechTimestamp,
+  ])
 
   // WebSocketの準備ができているかを確認
   const isWebSocketReady = useCallback(() => {

@@ -312,7 +312,9 @@ export const Menu = () => {
       {!isAutoplay && (
         <>
           {showChatLog && <ChatLog />}
-          {showSettings && <Settings onClickClose={() => setShowSettings(false)} />}
+          {showSettings && (
+            <Settings onClickClose={() => setShowSettings(false)} />
+          )}
           {!showChatLog &&
             assistantMessage &&
             (!slideMode || !slideVisible) &&

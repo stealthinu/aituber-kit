@@ -26,6 +26,7 @@ const Live2DComponent = () => {
   const [model, setModel] = useState<InstanceType<typeof Live2DModel> | null>(
     null
   )
+  const appRef = useRef<Application | null>(null)
   const modelRef = useRef<InstanceType<typeof Live2DModel> | null>(null)
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
@@ -41,8 +42,9 @@ const Live2DComponent = () => {
         modelRef.current.destroy()
         modelRef.current = null
       }
-      if (app) {
-        app.destroy(true)
+      if (appRef.current) {
+        appRef.current.destroy(true)
+        appRef.current = null
       }
     }
   }, [])
@@ -75,6 +77,7 @@ const Live2DComponent = () => {
     })
 
     setApp(app)
+    appRef.current = app
   }
 
   const loadLive2DModel = async (
