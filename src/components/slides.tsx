@@ -14,6 +14,19 @@ const obsConfig = {
   password: process.env.NEXT_PUBLIC_OBS_WEBSOCKET_PASSWORD || '', // パスワードを.envから取得
 }
 
+const stopRecordingDelayMs = (() => {
+  const rawSeconds = process.env.NEXT_PUBLIC_OBS_STOP_DELAY_SECONDS
+  if (!rawSeconds) return 0
+
+  const parsedSeconds = Number(rawSeconds)
+  if (!Number.isFinite(parsedSeconds) || parsedSeconds < 0) {
+    console.warn('NEXT_PUBLIC_OBS_STOP_DELAY_SECONDS は無効な値のため 0 に設定されました')
+    return 0
+  }
+
+  return parsedSeconds * 1000
+})()
+
 interface SlidesProps {
   markdown: string
 }
@@ -42,6 +55,7 @@ const Slides: React.FC<SlidesProps> = ({ markdown }) => {
   const currentVideosRef = useRef<HTMLVideoElement[]>([])
   // 自動再生の開始状態を追跡するためのRef
   const playbackStartedRef = useRef(false);
+  const stopRecordingTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null)
   
   // OBS接続関連の状態を追加
   const [obs, setObs] = useState<any>(null);
@@ -404,12 +418,8 @@ const Slides: React.FC<SlidesProps> = ({ markdown }) => {
       // 再生フラグもリセット
       playbackStartedRef.current = false;
       
-      // 録画中なら停止
-      if (obsConnected && isRecording) {
-        stopRecording();
-      }
     }
-  }, [currentSlide, slideCount, chatProcessingCount, videoPlaying, obsConnected, isRecording, stopRecording]);
+  }, [currentSlide, slideCount, chatProcessingCount, videoPlaying]);
   
   // コンポーネントのアンマウント時や選択スライドの変更時に自動再生状態をリセット
   useEffect(() => {
@@ -466,14 +476,49 @@ const Slides: React.FC<SlidesProps> = ({ markdown }) => {
 
   // isPlayingの変更を監視して録画を制御
   useEffect(() => {
-    if (isPlaying && obsConnected && !isRecording) {
-      // スライドショー開始時に録画開始
-      startRecording();
-    } else if (!isPlaying && obsConnected && isRecording) {
-      // スライドショー終了時に録画停止
-      stopRecording();
+    if (!obsConnected) {
+      return
     }
-  }, [isPlaying, obsConnected, isRecording, startRecording, stopRecording]);
+
+    if (isPlaying) {
+      // 再生再開時は停止タイマーをクリアし、録画を開始
+      if (stopRecordingTimeoutRef.current) {
+        clearTimeout(stopRecordingTimeoutRef.current)
+        stopRecordingTimeoutRef.current = null
+      }
+
+      if (!isRecording) {
+        startRecording()
+      }
+      return
+    }
+
+    if (isRecording) {
+      // 既にタイマーがある場合は再設定しない
+      if (stopRecordingTimeoutRef.current) {
+        return
+      }
+
+      if (stopRecordingDelayMs > 0) {
+        stopRecordingTimeoutRef.current = setTimeout(() => {
+          stopRecording()
+          stopRecordingTimeoutRef.current = null
+        }, stopRecordingDelayMs)
+      } else {
+        stopRecording()
+      }
+    }
+  }, [isPlaying, obsConnected, isRecording, startRecording, stopRecording, stopRecordingDelayMs])
+
+  // コンポーネントアンマウント時にタイマーをクリア
+  useEffect(() => {
+    return () => {
+      if (stopRecordingTimeoutRef.current) {
+        clearTimeout(stopRecordingTimeoutRef.current)
+        stopRecordingTimeoutRef.current = null
+      }
+    }
+  }, [])
 
   // 音声ナレーションと動画が終了したら次のスライドへ進む
   useEffect(() => {
