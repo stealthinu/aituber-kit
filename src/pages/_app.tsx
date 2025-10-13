@@ -52,33 +52,33 @@ export default function App({ Component, pageProps }: AppProps) {
     // スライド名が指定された場合
     if (typeof slide === 'string' && slide) {
       console.log(`スライドを自動選択: ${slide}`)
-      
+
       // スライドモードを有効化
       settingsStore.setState({ slideMode: true })
-      
+
       // 強制的に初期状態にリセット
-      slideStore.setState({ 
+      slideStore.setState({
         isPlaying: false,
         currentSlide: 0,
-        isAutoplay: false
-      });
-      
+        isAutoplay: false,
+      })
+
       // スライドを選択（この時点ではまだロード中）
       slideStore.setState({ selectedSlideDocs: slide })
-      
+
       // スライドを表示
       menuStore.setState({ slideVisible: true })
-      
+
       // 自動再生が指定された場合
       if (autoplay === 'true') {
         console.log('スライドの自動再生モードを設定します')
-        
+
         // イントロダクションを非表示にする
         homeStore.setState({ showIntroduction: false })
-        
+
         // 自動再生モードを設定
         slideStore.setState({ isAutoplay: true })
-        
+
         // 再生自体はslides.tsxのマークダウン変換完了後のタイミングで行う
         // そのため、ここではisPlayingの設定は行わない
       } else {
