@@ -4,7 +4,7 @@ import settingsStore from '@/features/stores/settings'
 import slideStore from '@/features/stores/slide'
 import { Link } from '../link'
 import { TextButton } from '../textButton'
-import { useCallback } from 'react'
+import { useCallback, useMemo } from 'react'
 import Image from 'next/image'
 import { Listbox } from '@headlessui/react'
 import {
@@ -117,22 +117,25 @@ const ModelProvider = () => {
 
   // オブジェクトを定義して、各AIサービスのデフォルトモデルを保存する
   // ローカルLLMが選択された場合、AIモデルを空文字に設定
-  const defaultModels = {
-    openai: 'gpt-4o-2024-11-20',
-    anthropic: 'claude-3-5-sonnet-20241022',
-    google: 'gemini-1.5-flash-latest',
-    azure: '',
-    groq: 'gemma2-9b-it',
-    cohere: 'command-r-plus',
-    mistralai: 'mistral-large-latest',
-    perplexity: 'llama-3-sonar-large-32k-online',
-    fireworks: 'accounts/fireworks/models/firefunction-v2',
-    deepseek: 'deepseek-chat',
-    lmstudio: '',
-    ollama: '',
-    dify: '',
-    'custom-api': '',
-  }
+  const defaultModels = useMemo(
+    () => ({
+      openai: 'gpt-4o-2024-11-20',
+      anthropic: 'claude-3-5-sonnet-20241022',
+      google: 'gemini-1.5-flash-latest',
+      azure: '',
+      groq: 'gemma2-9b-it',
+      cohere: 'command-r-plus',
+      mistralai: 'mistral-large-latest',
+      perplexity: 'llama-3-sonar-large-32k-online',
+      fireworks: 'accounts/fireworks/models/firefunction-v2',
+      deepseek: 'deepseek-chat',
+      lmstudio: '',
+      ollama: '',
+      dify: '',
+      'custom-api': '',
+    }),
+    []
+  )
 
   const handleAIServiceChange = useCallback(
     (newService: keyof typeof defaultModels) => {
@@ -163,7 +166,7 @@ const ModelProvider = () => {
         }
       }
     },
-    []
+    [defaultModels, selectAIModel]
   )
 
   const handleRealtimeAPIModeChange = useCallback((newMode: boolean) => {

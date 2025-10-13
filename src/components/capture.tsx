@@ -76,7 +76,7 @@ const Capture = () => {
       requestCapturePermission()
       requestCapturePermissionAttempted.current = true
     }
-  }, [permissionGranted])
+  }, [permissionGranted, requestCapturePermission])
 
   useEffect(() => {
     if (useVideoAsBackground && mediaStreamRef.current) {
