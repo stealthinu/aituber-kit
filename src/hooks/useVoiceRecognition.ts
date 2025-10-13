@@ -125,7 +125,7 @@ export const useVoiceRecognition = ({
         currentHook.stopListening()
       }
     }
-  }, []) // マウント時のみ実行
+  }, [continuousMicListeningMode, speechRecognitionMode, currentHook])
 
   // ----- キーボードショートカットの設定 -----
   useEffect(() => {
